@@ -13,8 +13,8 @@ export interface AuthRequest extends Request {
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
-    if(!authHeader){
-        return res.status(401).json({ message: "No token provided" });
+    if(!authHeader || !authHeader.startsWith("Bearer ")){
+        return res.status(401).json({ message: "Access Denied: No token provided" });
     }
 
     // Bearer <token>

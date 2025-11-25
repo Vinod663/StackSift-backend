@@ -27,7 +27,10 @@ app.use('/api/v1/post', postRoutes);
 app.use('/api/v1/auth', authRoutes);
 
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI, {
+  serverSelectionTimeoutMS: 20000,
+  socketTimeoutMS: 45000
+})
 .then(() => {
         console.log("Connected to MongoDB")
     }
