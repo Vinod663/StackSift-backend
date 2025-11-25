@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Website from '../models/website.model';
-import { AuthRequest } from '../middleware/auth.middleware'; // <--- Import the Interface
+import { AuthRequest } from '../middleware/auth.middleware'; 
+import { generateWebsiteInfo } from '../utils/ai';
 
 export const addWebsite = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
@@ -14,16 +15,44 @@ export const addWebsite = async (req: AuthRequest, res: Response): Promise<void>
              return;
         }
 
-        // 3. Create the new Website object
+        let finalDescription = description;
+        let finalCategory = category;
+        let finalTags = tags;
+
+
+        // Only call AI if the user didn't provide enough info
+        if (!description || !tags || tags.length === 0) {
+            console.log("🤖 Asking Gemini to analyze:", url);
+            const aiData = await generateWebsiteInfo(url);
+            
+            if (aiData) {
+                // If user left description blank, use AI's summary
+                if (!finalDescription) finalDescription = aiData.summary;
+                // If user left tags blank, use AI's tags
+                if (!finalTags || finalTags.length === 0) finalTags = aiData.tags;
+                // If user left category blank or 'Uncategorized', use AI's category
+                if (!finalCategory || finalCategory === 'Uncategorized') finalCategory = aiData.category;
+                else {
+                    console.log("⚠️ AI returned null (Failed to generate).");
+                }
+            }
+        }
+
+        // If AI failed AND user didn't provide a description, stop here.
+        if (!finalDescription) {
+            res.status(400).json({ 
+                message: "AI could not generate a description. Please enter one manually." 
+            });
+            return;
+        }
+
         const newWebsite = new Website({
             title,
             url,
-            description,
-            category,
-            tags: tags || [],
-            domain: domain || new URL(url).hostname.replace('www.', ''), // Auto-extract domain
-            
-            // 4. LINK THE USER! (This is the magic part)
+            description: finalDescription, // Now guaranteed to exist
+            category: finalCategory || 'Uncategorized',
+            tags: finalTags || [],
+            domain: new URL(url).hostname.replace('www.', ''),
             addedBy: req.user.sub 
         });
 
