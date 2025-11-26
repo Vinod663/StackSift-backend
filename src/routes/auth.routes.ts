@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, refreshToken } from '../controllers/auth.controller'; 
+import { register, login, refreshToken, googleLogin } from '../controllers/auth.controller'; 
 
 const router = Router();
 
@@ -10,6 +10,9 @@ router.post('/register', register);
 router.post('/login', login);
 
 //http://localhost:4000/api/v1/auth/refresh-token
-router.post('/refresh-token', refreshToken); // <--- NEW ROUTE
+router.post('/refresh-token', refreshToken); 
+
+//http://localhost:4000/api/v1/auth/google
+router.post('/google', googleLogin);
 
 export default router;

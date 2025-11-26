@@ -73,7 +73,7 @@ export const getAllWebsites = async (req: Request, res: Response) => {
 
         // 1. Build the Filter Object
         const filter: any = { approved: false }; // Change to 'true' later when admin is ready!
-
+        
         // 2. Search Logic (Regex = Partial Match)
         if (search) {
             filter.$or = [

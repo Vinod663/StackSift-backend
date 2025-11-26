@@ -8,7 +8,8 @@ export enum Role {
 export interface IUser extends Document {
   name: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
+  googleId?: string;
   avatarUrl?: string;
   role: Role[]; // Note: You named this "role" (singular)
   bio?: string;
@@ -18,7 +19,8 @@ export interface IUser extends Document {
 const UserSchema: Schema = new Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
-  passwordHash: { type: String, required: true },
+  passwordHash: { type: String, required: false },
+  googleId: { type: String, unique: true, sparse: true },
   avatarUrl: { type: String },
   role: { type: [String], enum: Object.values(Role), default: [Role.USER] },
   bio: { type: String },
