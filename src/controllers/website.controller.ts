@@ -66,45 +66,62 @@ export const addWebsite = async (req: AuthRequest, res: Response): Promise<void>
     }
 };
 
-// --- GET ALL WEBSITES (WITH SEARCH & FILTER) ---
+
+// --- GET ALL WEBSITES (Aggregation for Sorting by Array Length) ---
 export const getAllWebsites = async (req: Request, res: Response) => {
     try {
-        const { page = 1, limit = 10, search, category } = req.query;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 12; // Default to 12
+        const search = req.query.search as string;
+        const category = req.query.category as string;
 
-        // 1. Build the Filter Object
-        const filter: any = { approved: false }; // Change to 'true' later when admin is ready!
-        
-        // 2. Search Logic (Regex = Partial Match)
+        // 1. Build Match Stage (Filtering)
+        const matchStage: any = { approved: false };
+
         if (search) {
-            filter.$or = [
-                { title: { $regex: search, $options: 'i' } },       // Case-insensitive search in Title
-                { description: { $regex: search, $options: 'i' } }, // ... or Description
-                { tags: { $regex: search, $options: 'i' } }         // ... or Tags
+            matchStage.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { tags: { $regex: search, $options: 'i' } }
             ];
         }
 
-        // 3. Category Logic (Exact Match)
-        if (category) {
-            filter.category = category;
+        if (category && category !== 'All') {
+            matchStage.category = category;
         }
 
-        // 4. Execute Query with Pagination
-        const websites = await Website.find(filter)
-            .limit(Number(limit) * 1)
-            .skip((Number(page) - 1) * Number(limit))
-            .sort({ createdAt: -1 }); // Newest first
+        // 2. Run Aggregation Pipeline
+        const websites = await Website.aggregate([
+            { $match: matchStage },
+            {
+                $addFields: {
+                    // Create a temporary field 'likeCount' just for sorting
+                    likeCount: { $size: { $ifNull: ["$upvotes", []] } } 
+                }
+            },
+            { 
+                $sort: { 
+                    likeCount: -1, // Sort by calculated Length (Most Likes first)
+                    views: -1,     // Then by Views
+                    createdAt: -1  // Then by Newest
+                } 
+            },
+            { $skip: (page - 1) * limit },
+            { $limit: limit }
+        ]);
 
-        // 5. Get Total Count (for Frontend pagination UI)
-        const count = await Website.countDocuments(filter);
+        // 3. Get Total Count (Separate query needed for pagination)
+        const totalDocs = await Website.countDocuments(matchStage);
 
         res.status(200).json({
             websites,
-            totalPages: Math.ceil(count / Number(limit)),
-            currentPage: Number(page),
-            totalWebsites: count
+            totalPages: Math.ceil(totalDocs / limit),
+            currentPage: page,
+            totalWebsites: totalDocs
         });
 
     } catch (error) {
+        console.error("Fetch Error:", error);
         res.status(500).json({ message: 'Error fetching websites', error });
     }
 };
