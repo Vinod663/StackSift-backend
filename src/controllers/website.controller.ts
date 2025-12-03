@@ -123,3 +123,57 @@ export const searchAI = async (req: Request, res: Response) => {
         res.status(500).json({ message: "AI Search Error", error });
     }
 };
+
+
+// --- LIKE/UPVOTE A WEBSITE ---
+export const likeWebsite = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.sub; // Get logged-in user ID
+
+        const website = await Website.findById(id);
+        if (!website) return res.status(404).json({ message: "Website not found" });
+
+        // Check if user already liked it
+        const index = website.upvotes.indexOf(userId);
+
+        if (index === -1) {
+            // Not liked yet -> Add Like
+            website.upvotes.push(userId);
+        } else {
+            // Already liked -> Remove Like (Toggle)
+            website.upvotes.splice(index, 1);
+        }
+
+        await website.save();
+
+        res.status(200).json({ 
+            message: index === -1 ? "Liked" : "Unliked", 
+            data: website 
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error liking website", error });
+    }
+};
+
+//View Website
+export const viewWebsite = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        // Ensure we increment ONLY the views
+        const website = await Website.findByIdAndUpdate(
+            id,
+            { $inc: { views: 1 } },
+            { new: true }
+        );
+
+        if (!website) {
+            return res.status(404).json({ message: "Website not found" });
+        }
+
+        res.status(200).json({ message: "View counted", data: website });
+    } catch (error) {
+        res.status(500).json({ message: "Error counting view", error });
+    }
+};

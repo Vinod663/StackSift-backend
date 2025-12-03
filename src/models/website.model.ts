@@ -11,7 +11,7 @@ export interface IWebsite extends Document {
   screenshotUrl?: string;   // Optional (?) because AI might not get it immediately
   addedBy?: mongoose.Types.ObjectId; // Link to the User who added it
   approved: boolean;        // For Admin moderation
-  upvotes: number;
+  upvotes: mongoose.Types.ObjectId[];
   views: number;
   
   // The AI Fields (The "StackSift" Magic)
@@ -39,7 +39,7 @@ const WebsiteSchema: Schema = new Schema({
   
   // Status Fields
   approved: { type: Boolean, default: false }, // Default: Pending approval
-  upvotes: { type: Number, default: 0 },
+  upvotes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   views: { type: Number, default: 0 },
 
   // AI Generated Data
