@@ -1,13 +1,20 @@
 import { Router } from 'express';
-import { addWebsite, getAllWebsites } from '../controllers/website.controller';
+import { addWebsite, getAllWebsites, searchAI } from '../controllers/website.controller';
 import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
 //http://localhost:4000/api/v1/post/addWebsite
+//protected route
 router.post('/addWebsite', authenticate, addWebsite);
 
 //http://localhost:4000/api/v1/post/
+//public route
 router.get('/', getAllWebsites);
+
+// Add this NEW route
+//http://localhost:4000/api/v1/post/search-ai
+//public route
+router.post('/search-ai', searchAI); 
 
 export default router;

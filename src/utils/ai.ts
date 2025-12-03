@@ -48,3 +48,33 @@ export const generateWebsiteInfo = async (url: string): Promise<AIResponse | nul
     return null; // If AI fails, we just return null and use manual data
   }
 };
+
+
+export const suggestToolsFromAI = async (query: string) => {
+  try {
+    const prompt = `
+      The user is searching for a developer tool: "${query}".
+      Suggest 3 REAL, existing tools that solve this problem.
+      
+      Return ONLY a JSON array. Format:
+      [
+        {
+          "title": "Tool Name",
+          "url": "https://tool-url.com",
+          "description": "Short 1-sentence description.",
+          "category": "Development",
+          "tags": ["tag1", "tag2"]
+        }
+      ]
+    `;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("AI Search Failed:", error);
+    return [];
+  }
+};

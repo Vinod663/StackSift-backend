@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Website from '../models/website.model';
 import { AuthRequest } from '../middleware/auth.middleware'; 
-import { generateWebsiteInfo } from '../utils/ai';
+import { generateWebsiteInfo, suggestToolsFromAI } from '../utils/ai';
 
 export const addWebsite = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
@@ -106,5 +106,20 @@ export const getAllWebsites = async (req: Request, res: Response) => {
 
     } catch (error) {
         res.status(500).json({ message: 'Error fetching websites', error });
+    }
+};
+
+// NEW: AI Search Endpoint
+export const searchAI = async (req: Request, res: Response) => {
+    try {
+        const { query } = req.body;
+        if (!query) return res.status(400).json({ message: "Query required" });
+
+        console.log("🤖 AI Searching for:", query);
+        const suggestions = await suggestToolsFromAI(query);
+
+        res.status(200).json({ websites: suggestions });
+    } catch (error) {
+        res.status(500).json({ message: "AI Search Error", error });
     }
 };
