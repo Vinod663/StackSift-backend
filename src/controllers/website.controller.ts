@@ -71,7 +71,7 @@ export const addWebsite = async (req: AuthRequest, res: Response): Promise<void>
 export const getAllWebsites = async (req: Request, res: Response) => {
     try {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 9; // Default to 12
+        const limit = parseInt(req.query.limit as string) || 9; // Default to 9
         const search = req.query.search as string;
         const category = req.query.category as string;
 
@@ -82,7 +82,8 @@ export const getAllWebsites = async (req: Request, res: Response) => {
             matchStage.$or = [
                 { title: { $regex: search, $options: 'i' } },
                 { description: { $regex: search, $options: 'i' } },
-                { tags: { $regex: search, $options: 'i' } }
+                { tags: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } }
             ];
         }
 
