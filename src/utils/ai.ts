@@ -54,7 +54,7 @@ export const suggestToolsFromAI = async (query: string) => {
   try {
     const prompt = `
       The user is searching for a developer tool: "${query}".
-      Suggest 3 REAL, existing tools that solve this problem.
+      Suggest 6 REAL, existing tools that solve this problem.
       
       Return ONLY a JSON array. Format:
       [
