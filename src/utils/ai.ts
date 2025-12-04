@@ -23,7 +23,7 @@ export const generateWebsiteInfo = async (url: string): Promise<AIResponse | nul
       
       Tasks:
       1. Write a short, punchy summary (max 2 sentences) for a developer audience.
-      2. Choose ONE category from: [Development, Design, Productivity, AI, DevOps, Learning].
+      2. Choose ONE category from: [Development, Design, Productivity, AI, DevOps, Learning].(Do not use "Development" if "Design" or "AI" fits better).
       3. Generate 3-5 relevant, lowercase tags.
 
       Return ONLY a JSON object like this:
@@ -56,13 +56,19 @@ export const suggestToolsFromAI = async (query: string) => {
       The user is searching for a developer tool: "${query}".
       Suggest 6 REAL, existing tools that solve this problem.
       
+      Tasks:
+      1. Find 6 tools.
+      2. For EACH tool, pick the ONE best matching category from this list: 
+         [Development, Design, Productivity, AI, DevOps, Learning].
+         (Do not use "Development" if "Design" or "AI" fits better).
+
       Return ONLY a JSON array. Format:
       [
         {
           "title": "Tool Name",
           "url": "https://tool-url.com",
           "description": "Short 1-sentence description.",
-          "category": "Development",
+          "category": "The_Best_Category_From_List",
           "tags": ["tag1", "tag2"]
         }
       ]
