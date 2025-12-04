@@ -54,10 +54,10 @@ export const suggestToolsFromAI = async (query: string) => {
   try {
     const prompt = `
       The user is searching for a developer tool: "${query}".
-      Suggest 6 REAL, existing tools that solve this problem.
+      Suggest 9 REAL, existing tools that solve this problem.
       
       Tasks:
-      1. Find 6 tools.
+      1. Find 9 tools.
       2. For EACH tool, pick the ONE best matching category from this list: 
          [Development, Design, Productivity, AI, DevOps, Learning].
          (Do not use "Development" if "Design" or "AI" fits better).
