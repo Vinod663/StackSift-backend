@@ -74,9 +74,15 @@ export const getAllWebsites = async (req: Request, res: Response) => {
         const limit = parseInt(req.query.limit as string) || 9; // Default to 9
         const search = req.query.search as string;
         const category = req.query.category as string;
+        const approvedQuery = req.query.approved as string;
 
         // 1. Build Match Stage (Filtering)
-        const matchStage: any = { approved: false };
+        const matchStage: any = {}; // Only approved websites
+
+        // Only filter by approved if specifically requested
+        if (approvedQuery === 'true') matchStage.approved = true;
+        if (approvedQuery === 'false') matchStage.approved = false;
+        // If not sent, it might return both (or you can default to true)
 
         if (search) {
             matchStage.$or = [
@@ -193,5 +199,62 @@ export const viewWebsite = async (req: Request, res: Response) => {
         res.status(200).json({ message: "View counted", data: website });
     } catch (error) {
         res.status(500).json({ message: "Error counting view", error });
+    }
+};
+
+
+export const deleteWebsite = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        await Website.findByIdAndDelete(id);
+        res.status(200).json({ message: "Website deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting website", error });
+    }
+};
+
+
+// --- APPROVE WEBSITE (Admin) ---
+export const approveWebsite = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        // Find and update 'approved' to true
+        const website = await Website.findByIdAndUpdate(
+            id,
+            { approved: true },
+            { new: true } // Return the updated document
+        );
+
+        if (!website) {
+            return res.status(404).json({ message: "Website not found" });
+        }
+
+        res.status(200).json({ message: "Website approved successfully", data: website });
+    } catch (error) {
+        res.status(500).json({ message: "Error approving website", error });
+    }
+};
+
+// --- UPDATE WEBSITE (Admin/Owner) ---
+export const updateWebsite = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        // Whitelist fields to prevent overwriting upvotes/views/addedBy
+        const { title, description, category, tags, url } = req.body;
+        
+        const updatedWebsite = await Website.findByIdAndUpdate(
+            id,
+            { title, description, category, tags, url },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedWebsite) {
+            return res.status(404).json({ message: "Website not found" });
+        }
+
+        res.status(200).json({ message: "Website updated successfully", data: updatedWebsite });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating website", error });
     }
 };

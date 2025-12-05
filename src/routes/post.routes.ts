@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addWebsite, getAllWebsites, searchAI, likeWebsite , viewWebsite } from '../controllers/website.controller';
+import { addWebsite, getAllWebsites, searchAI, likeWebsite , viewWebsite, deleteWebsite, approveWebsite, updateWebsite } from '../controllers/website.controller';
 import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -8,6 +8,9 @@ const router = Router();
 //protected route
 router.post('/addWebsite', authenticate, addWebsite);
 router.put('/:id/like', authenticate, likeWebsite);
+router.put('/:id/approve', authenticate, approveWebsite);
+router.delete('/:id', authenticate, deleteWebsite);
+router.put('/:id', authenticate, updateWebsite);
 
 //http://localhost:4000/api/v1/post/
 //public route

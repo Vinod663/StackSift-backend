@@ -16,7 +16,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // --- REGISTER ---
 export const register = async (req: Request, res: Response) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role } = req.body;
 
         if (!name || !email || !password) {
             // Added return to stop execution
@@ -30,7 +30,7 @@ export const register = async (req: Request, res: Response) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ name, email, passwordHash: hashedPassword });
+        const newUser = new User({ name, email, passwordHash: hashedPassword, role: role || ['USER'] });
         await newUser.save();
 
         res.status(201).json({

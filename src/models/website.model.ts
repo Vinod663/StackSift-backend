@@ -47,9 +47,9 @@ const WebsiteSchema: Schema = new Schema({
   aiCategories: { type: [String] },
   aiKeywords: { type: [String] },
 
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  // createdAt: { type: Date, default: Date.now },
+  // updatedAt: { type: Date, default: Date.now }
+}, { timestamps: true });
 
 // 3. Export
 export default mongoose.model<IWebsite>('Website', WebsiteSchema);
