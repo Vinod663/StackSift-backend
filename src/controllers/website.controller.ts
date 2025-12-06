@@ -25,7 +25,7 @@ export const addWebsite = async (req: AuthRequest, res: Response): Promise<void>
             console.log("🤖 Asking Gemini to analyze:", url);
             const aiData = await generateWebsiteInfo(url);
             
-            if (aiData) {
+            if (aiData) {                                                           //description, category, tags are optional 
                 // If user left description blank, use AI's summary
                 if (!finalDescription) finalDescription = aiData.summary;
                 // If user left tags blank, use AI's tags
