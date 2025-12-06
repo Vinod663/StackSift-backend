@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import postRoutes from './routes/post.routes';
 import authRoutes from './routes/auth.routes';
+import collectionRoutes from './routes/collection.routes';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cors({
 // Routes
 app.use('/api/v1/post', postRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/collections', collectionRoutes);
 
 
 mongoose.connect(MONGO_URI, {
