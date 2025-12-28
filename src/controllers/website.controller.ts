@@ -139,12 +139,19 @@ export const searchAI = async (req: Request, res: Response) => {
         const { query } = req.body;
         if (!query) return res.status(400).json({ message: "Query required" });
 
-        console.log("🤖 AI Searching for:", query);
+        // This now handles Caching AND API calls internally
         const suggestions = await suggestToolsFromAI(query);
+
+        if (suggestions.length === 0) {
+            // If AI failed or returned nothing, send 200 with empty array
+            // This allows the frontend to just show DB results without error
+            return res.status(200).json({ websites: [] });
+        }
 
         res.status(200).json({ websites: suggestions });
     } catch (error) {
-        res.status(500).json({ message: "AI Search Error", error });
+        console.error("Controller Error:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };
 

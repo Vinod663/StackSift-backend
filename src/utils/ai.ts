@@ -1,11 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import AiCache from '../models/aiCache.model';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 // 1. Setup Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // 2. Define the expected output structure
 interface AIResponse {
@@ -51,7 +52,17 @@ export const generateWebsiteInfo = async (url: string): Promise<AIResponse | nul
 
 
 export const suggestToolsFromAI = async (query: string) => {
+
+  const cleanQuery = query.toLowerCase().trim();
+
   try {
+    const cachedData = await AiCache.findOne({ query: cleanQuery });
+
+    if (cachedData) {
+        console.log(`⚡ Serving "${cleanQuery}" from Cache (Saved API Call)`);
+        return cachedData.results;
+    }
+
     const prompt = `
       The user is searching for a developer tool: "${query}".
       Suggest 9 REAL, existing tools that solve this problem.
@@ -75,12 +86,48 @@ export const suggestToolsFromAI = async (query: string) => {
     `;
 
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const response = await result.response;
+    // Aggressive cleanup: remove markdown, newlines, and code blocks
+    let text = response.text().replace(/```json|```/g, '').trim();
     
-    return JSON.parse(jsonString);
-  } catch (error) {
-    console.error("AI Search Failed:", error);
+    // Find the start [ and end ] to ignore any extra text the AI might have added
+    const firstBracket = text.indexOf('[');
+    const lastBracket = text.lastIndexOf(']');
+    
+    if (firstBracket !== -1 && lastBracket !== -1) {
+        text = text.substring(firstBracket, lastBracket + 1);
+    }
+    
+    let aiResults;
+    try {
+        aiResults = JSON.parse(text);
+    } catch (jsonError) {
+        console.error("❌ AI returned invalid JSON. Raw text:", text);
+        return []; // Return empty array instead of crashing
+    }
+
+    // 3. SAVE TO CACHE (Using Upsert to fix Race Condition)
+    if (Array.isArray(aiResults) && aiResults.length > 0) {
+        await AiCache.findOneAndUpdate(
+            { query: cleanQuery }, // Find by query
+            { 
+                query: cleanQuery, 
+                results: aiResults,
+                createdAt: new Date() // Reset expiry timer
+            },
+            { upsert: true, new: true } // Create if not exists
+        );
+        console.log(`💾 Saved "${cleanQuery}" to Cache`);
+    }
+
+    return aiResults;
+
+  } catch (error: any) {
+    if (error.status === 429 || error.message?.includes('429')) {
+        console.warn("⚠️ AI Rate Limit. Returning empty.");
+    } else {
+        console.error("AI Error:", error);
+    }
     return [];
   }
 };
