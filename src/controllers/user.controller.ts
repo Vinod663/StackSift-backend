@@ -19,11 +19,16 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
 // --- UPDATE DETAILS (Name, Bio, Password) ---
 export const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const { name, bio, password } = req.body; // Destructure password
+        const { name, bio, password, coverGradient } = req.body; // Destructure password
         const userId = req.user.sub;
 
         // Prepare the update object
         const updateData: any = { name, bio };
+
+        // If coverGradient is sent, add it to update
+        if (coverGradient) {
+            updateData.coverGradient = coverGradient;
+        }
 
         // If user sent a new password, hash it and add to updateData
         if (password) {

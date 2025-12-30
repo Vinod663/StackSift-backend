@@ -13,6 +13,7 @@ export interface IUser extends Document {
   avatarUrl?: string;
   role: Role[]; // Note: You named this "role" (singular)
   bio?: string;
+  coverGradient?: string;
   createdAt: Date;
 }
 
@@ -24,6 +25,7 @@ const UserSchema: Schema = new Schema({
   avatarUrl: { type: String },
   role: { type: [String], enum: Object.values(Role), default: [Role.USER] },
   bio: { type: String },
+  coverGradient: { type: String, default: 'default' },
   createdAt: { type: Date, default: Date.now }
 });
 

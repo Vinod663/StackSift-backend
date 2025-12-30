@@ -42,6 +42,7 @@ export const register = async (req: Request, res: Response) => {
                 email: newUser.email,
                 role: newUser.role,
                 avatarUrl: newUser.avatarUrl,
+                coverGradient: newUser.coverGradient || 'default',
                 bio: newUser.bio
             }
         });
@@ -82,7 +83,7 @@ export const login = async (req: Request, res: Response) => {
 
         res.json({
             message: 'Login successful',
-            user: { id: user._id, name: user.name, role: user.role, email: user.email, avatarUrl: user.avatarUrl, bio: user.bio },
+            user: { id: user._id, name: user.name, role: user.role, email: user.email, avatarUrl: user.avatarUrl, bio: user.bio, coverGradient: user.coverGradient || 'default' },
             accessToken,
             refreshToken
         });
@@ -174,7 +175,7 @@ export const googleLogin = async (req: Request, res: Response) => {
 
         res.status(200).json({
             message: 'Google Login successful',
-            user: { id: user._id, name: user.name, role: user.role, email: user.email, avatarUrl: user.avatarUrl },
+            user: { id: user._id, name: user.name, role: user.role, email: user.email, avatarUrl: user.avatarUrl, bio: user.bio, coverGradient: user.coverGradient || 'default' },
             accessToken,
             refreshToken
         });
