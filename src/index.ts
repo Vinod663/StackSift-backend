@@ -6,6 +6,7 @@ import postRoutes from './routes/post.routes';
 import authRoutes from './routes/auth.routes';
 import collectionRoutes from './routes/collection.routes';
 import contactRoutes from './routes/contact.routes';
+import userRoutes from './routes/user.routes';
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ const SERVER_PORT = process.env.SERVER_PORT
 const MONGO_URI = process.env.MONGO_URI as string
 
 const app = express()
+
+
 
 app.use(express.json())
 
@@ -30,6 +33,9 @@ app.use('/api/v1/post', postRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/collections', collectionRoutes);
 app.use('/api/v1/contact', contactRoutes);
+
+
+app.use('/api/v1/user', userRoutes);
 
 
 mongoose.connect(MONGO_URI, {

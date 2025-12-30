@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { register, login, refreshToken, googleLogin } from '../controllers/auth.controller'; 
+import { authenticate } from '../middleware/auth.middleware';
+import { register, login, refreshToken, googleLogin, verifyPassword } from '../controllers/auth.controller'; 
 
 const router = Router();
 
@@ -14,5 +15,8 @@ router.post('/refresh-token', refreshToken);
 
 //http://localhost:4000/api/v1/auth/google
 router.post('/google', googleLogin);
+
+//http://localhost:4000/api/v1/auth/verify-password
+router.post('/verify-password', authenticate, verifyPassword);
 
 export default router;

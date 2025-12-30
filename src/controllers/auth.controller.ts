@@ -6,6 +6,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'; // Import JwtPayload type
 import { OAuth2Client } from 'google-auth-library';
 import { Role } from '../models/user.model';
 import dotenv from 'dotenv';
+import { AuthRequest } from '../middleware/auth.middleware';
 
 dotenv.config();
 
@@ -39,7 +40,9 @@ export const register = async (req: Request, res: Response) => {
                 id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
-                role: newUser.role
+                role: newUser.role,
+                avatarUrl: newUser.avatarUrl,
+                bio: newUser.bio
             }
         });
 
@@ -79,7 +82,7 @@ export const login = async (req: Request, res: Response) => {
 
         res.json({
             message: 'Login successful',
-            user: { id: user._id, name: user.name, role: user.role, email: user.email },
+            user: { id: user._id, name: user.name, role: user.role, email: user.email, avatarUrl: user.avatarUrl, bio: user.bio },
             accessToken,
             refreshToken
         });
@@ -178,5 +181,42 @@ export const googleLogin = async (req: Request, res: Response) => {
 
     } catch (error: any) {
         res.status(500).json({ message: 'Google Login Failed', error: error?.message });
+    }
+};
+
+
+// --- VERIFY PASSWORD (Sudo Mode) ---
+export const verifyPassword = async (req: AuthRequest, res: Response) => {
+    try {
+        const { password } = req.body;
+        const userId = req.user.sub; 
+
+        // 1. Find User FIRST
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // 2. Check for Google User (No Password Hash)
+        // If they don't have a password hash, we allow them to pass immediately
+        if (!user.passwordHash) {
+            return res.status(200).json({ 
+                message: "Google authenticated. Verification successful." 
+            });
+        }
+
+        // 3. NOW check if password was provided
+        if (!password) {
+            return res.status(400).json({ message: "Password is required" });
+        }
+
+        // 4. Verify Password
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Incorrect password" });
+        }
+
+        res.status(200).json({ message: "Verified" });
+
+    } catch (error: any) {
+        res.status(500).json({ message: "Verification failed", error: error.message });
     }
 };
