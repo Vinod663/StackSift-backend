@@ -10,7 +10,7 @@ export interface ICollection extends Document {
 const CollectionSchema: Schema = new Schema({
   name: { type: String, required: true, trim: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  websites: [{ type: Schema.Types.ObjectId, ref: 'Website' }], // References the Website Model
+  websites: [{ type: Schema.Types.ObjectId, ref: 'Website' }],
 }, { timestamps: true });
 
 // Prevent duplicate folder names for the same user

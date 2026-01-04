@@ -8,24 +8,22 @@ export const sendContactEmail = async (req: Request, res: Response) => {
     try {
         const { name, email, subject, message } = req.body;
 
-        // 1. Configure the Transporter (Gmail Example)
-        // NOTE: For Gmail, you need an "App Password" if 2FA is on.
-        // Go to Google Account > Security > 2-Step Verification > App Passwords
+        //Configure the Transporter (Gmail Example)
         const transporter = nodemailer.createTransport({
             service: 'gmail', 
             auth: {
-                user: process.env.MAIL_USER, // Your Gmail address
-                pass: process.env.MAIL_PASS  // Your Gmail App Password
+                user: process.env.MAIL_USER, 
+                pass: process.env.MAIL_PASS  
             }
         });
 
-        // 2. Define Email Options
+        //Define Email Options
         const mailOptions = {
-            // CHANGE: Put name AND email in the display name part
+            // Put name AND email in the display name part
             // Format: "Vinod (vinod@user.com)" <system@gmail.com>
             from: `"${name} (${email}) - StackSift" <${process.env.MAIL_USER}>`, 
             
-            replyTo: email, // This is crucial: Hitting "Reply" goes to the user
+            replyTo: email, 
             to: process.env.MAIL_USER, 
             subject: `[StackSift Support] ${subject}`,
             html: `
@@ -43,7 +41,7 @@ export const sendContactEmail = async (req: Request, res: Response) => {
             `
         };
 
-        // 3. Send Email
+        //Send Email
         await transporter.sendMail(mailOptions);
 
         res.status(200).json({ message: "Email sent successfully!" });

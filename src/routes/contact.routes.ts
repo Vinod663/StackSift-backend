@@ -3,7 +3,7 @@ import { sendContactEmail } from '../controllers/contact.controller';
 
 const router = Router();
 
-// POST http://localhost:4000/api/v1/contact
+// http://localhost:4000/api/v1/contact
 router.post('/', sendContactEmail);
 
 export default router;

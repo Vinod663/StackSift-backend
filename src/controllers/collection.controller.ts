@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import Collection from '../models/collection.model';
 
-// 1. Create a New Folder
+// Create a New Folder
 export const createCollection = async (req: AuthRequest, res: Response) => {
     try {
         const { name } = req.body;
@@ -20,7 +20,7 @@ export const createCollection = async (req: AuthRequest, res: Response) => {
     }
 };
 
-// 2. Get All User Collections (with populated websites)
+//Get All User Collections (with populated websites)
 export const getUserCollections = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user.sub;
@@ -35,7 +35,7 @@ export const getUserCollections = async (req: AuthRequest, res: Response) => {
     }
 };
 
-// 3. Add Website to a Collection
+// Add Website to a Collection
 export const addToCollection = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params; // Collection ID
@@ -54,7 +54,7 @@ export const addToCollection = async (req: AuthRequest, res: Response) => {
     }
 };
 
-// 4. Remove Website from Collection
+//Remove Website from Collection
 export const removeFromCollection = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params; // Collection ID
@@ -72,7 +72,7 @@ export const removeFromCollection = async (req: AuthRequest, res: Response) => {
     }
 };
 
-// 5. Delete a Collection
+//Delete a Collection
 export const deleteCollection = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;

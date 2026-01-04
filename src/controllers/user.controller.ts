@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import User from '../models/user.model';
 import { AuthRequest } from '../middleware/auth.middleware';
-import Website from '../models/website.model'; // Import Website Model
-import Collection from '../models/collection.model'; // Import Collection Model
+import Website from '../models/website.model'; 
+import Collection from '../models/collection.model'; 
 import bcrypt from 'bcryptjs';
 
 // --- GET PROFILE ---
@@ -25,7 +25,6 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         // Prepare the update object
         const updateData: any = { name, bio };
 
-        // If coverGradient is sent, add it to update
         if (coverGradient) {
             updateData.coverGradient = coverGradient;
         }
@@ -40,7 +39,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
             userId,
             updateData,
             { new: true, runValidators: true }
-        ).select('-passwordHash'); // Never return the hash
+        ).select('-passwordHash'); 
 
         res.json({ message: "Profile updated", user: updatedUser });
     } catch (error) {
@@ -56,7 +55,7 @@ export const uploadAvatar = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ message: "No file uploaded" });
         }
 
-        // Cloudinary automatically provides the secure URL here
+        // Cloudinary automatically provides the secure URL
         const avatarUrl = req.file.path; 
 
         const updatedUser = await User.findByIdAndUpdate(
@@ -79,8 +78,8 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
 
         // Run both counts in parallel for speed
         const [toolsCount, collectionsCount] = await Promise.all([
-            Website.countDocuments({ addedBy: userId }), // Count tools added by user
-            Collection.countDocuments({ userId: userId }) // Count collections owned by user
+            Website.countDocuments({ addedBy: userId }), 
+            Collection.countDocuments({ userId: userId }) 
         ]);
 
         res.json({ 

@@ -9,7 +9,7 @@ export interface IAiCache extends Document {
 const AiCacheSchema: Schema = new Schema({
   query: { type: String, required: true, unique: true, lowercase: true, trim: true },
   results: { type: Array, required: true },
-  createdAt: { type: Date, default: Date.now, expires: '7d' } // Auto-delete after 7 days (optional)
+  createdAt: { type: Date, default: Date.now, expires: '7d' } // Auto-delete after 7 days 
 });
 
 export default mongoose.model<IAiCache>('AiCache', AiCacheSchema);

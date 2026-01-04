@@ -16,7 +16,6 @@ router.put('/:id', authenticate, updateWebsite);
 //public route
 router.get('/', getAllWebsites);
 
-// Add this NEW route
 //http://localhost:4000/api/v1/post/search-ai
 //public route
 router.post('/search-ai', searchAI); 

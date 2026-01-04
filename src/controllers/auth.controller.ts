@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model';
-import { signAccessToken, signRefreshToken } from '../utils/tokens'; // Fixed 'utills' typo
-import jwt, { JwtPayload } from 'jsonwebtoken'; // Import JwtPayload type
+import { signAccessToken, signRefreshToken } from '../utils/tokens'; 
+import jwt, { JwtPayload } from 'jsonwebtoken'; 
 import { OAuth2Client } from 'google-auth-library';
 import { Role } from '../models/user.model';
 import dotenv from 'dotenv';
@@ -20,7 +20,6 @@ export const register = async (req: Request, res: Response) => {
         const { name, email, password, role } = req.body;
 
         if (!name || !email || !password) {
-            // Added return to stop execution
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -48,7 +47,6 @@ export const register = async (req: Request, res: Response) => {
         });
 
     } catch (error: any) {
-        // Fixed error message text
         res.status(500).json({ message: 'Error registering user', error: error?.message });
     }
 }
@@ -112,7 +110,6 @@ export const refreshToken = async (req: Request, res: Response) => {
 
         const accessToken = signAccessToken(user);
 
-        // Fixed: Removed the double response. Sending only one JSON object.
         res.status(200).json({
             message: 'New access token generated successfully',
             accessToken: accessToken
@@ -132,7 +129,7 @@ export const googleLogin = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Token is required" });
         }
 
-        // 1. Verify the Token with Google
+        //Verify the Token with Google
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID, 
@@ -146,7 +143,7 @@ export const googleLogin = async (req: Request, res: Response) => {
 
         const { email, name, picture, sub: googleId } = payload;
 
-        // 2. Check if user already exists in OUR database
+        // Check if user already exists in OUR database
         let user = await User.findOne({ email });
 
         if (user) {
@@ -157,19 +154,18 @@ export const googleLogin = async (req: Request, res: Response) => {
                 await user.save();
             }
         } else {
-            // User doesn't exist! -> Register them automatically
+            // User doesn't exist!
             user = new User({
                 name: name,
                 email: email,
                 googleId: googleId,
                 avatarUrl: picture,
                 role: [Role.USER],
-                // No passwordHash needed!
             });
             await user.save();
         }
 
-        // 3. Generate Our Tokens (Same as normal login)
+        //Generate Tokens (Same as normal login)
         const accessToken = signAccessToken(user);
         const refreshToken = signRefreshToken(user);
 
@@ -192,24 +188,23 @@ export const verifyPassword = async (req: AuthRequest, res: Response) => {
         const { password } = req.body;
         const userId = req.user.sub; 
 
-        // 1. Find User FIRST
+        // Find User FIRST
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        // 2. Check for Google User (No Password Hash)
-        // If they don't have a password hash, we allow them to pass immediately
+        // Check for Google User (No Password Hash)
         if (!user.passwordHash) {
             return res.status(200).json({ 
                 message: "Google authenticated. Verification successful." 
             });
         }
 
-        // 3. NOW check if password was provided
+        // NOW check if password was provided
         if (!password) {
             return res.status(400).json({ message: "Password is required" });
         }
 
-        // 4. Verify Password
+        // Verify Password
         const isMatch = await bcrypt.compare(password, user.passwordHash);
         if (!isMatch) {
             return res.status(401).json({ message: "Incorrect password" });

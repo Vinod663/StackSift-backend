@@ -5,11 +5,10 @@ import { generateWebsiteInfo, suggestToolsFromAI } from '../utils/ai';
 
 export const addWebsite = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        // 1. Get data from the user body
+        // Get data from the user body
         const { title, url, description, category, tags, domain } = req.body;
 
-        // 2. SECURITY CHECK: Ensure user is logged in
-        // The 'authenticate' middleware should catch this, but this is a double-check
+        // SECURITY CHECK: Ensure user is logged in
         if (!req.user || !req.user.sub) {
              res.status(401).json({ message: "User not identified" });
              return;
@@ -25,7 +24,7 @@ export const addWebsite = async (req: AuthRequest, res: Response): Promise<void>
             console.log("🤖 Asking Gemini to analyze:", url);
             const aiData = await generateWebsiteInfo(url);
             
-            if (aiData) {                                                           //description, category, tags are optional 
+            if (aiData) { //description, category, tags are optional 
                 // If user left description blank, use AI's summary
                 if (!finalDescription) finalDescription = aiData.summary;
                 // If user left tags blank, use AI's tags
@@ -49,7 +48,7 @@ export const addWebsite = async (req: AuthRequest, res: Response): Promise<void>
         const newWebsite = new Website({
             title,
             url,
-            description: finalDescription, // Now guaranteed to exist
+            description: finalDescription, 
             category: finalCategory || 'Uncategorized',
             tags: finalTags || [],
             domain: new URL(url).hostname.replace('www.', ''),
@@ -71,18 +70,18 @@ export const addWebsite = async (req: AuthRequest, res: Response): Promise<void>
 export const getAllWebsites = async (req: Request, res: Response) => {
     try {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 9; // Default to 9
+        const limit = parseInt(req.query.limit as string) || 9; 
         const search = req.query.search as string;
         const category = req.query.category as string;
         const approvedQuery = req.query.approved as string;
 
-        // 1. Build Match Stage (Filtering)
+        // Build Match Stage (Filtering)
         const matchStage: any = {}; // Only approved websites
 
         // Only filter by approved if specifically requested
         if (approvedQuery === 'true') matchStage.approved = true;
         if (approvedQuery === 'false') matchStage.approved = false;
-        // If not sent, it might return both (or you can default to true)
+        // If not sent, it might return both 
 
         if (search) {
             matchStage.$or = [
@@ -97,7 +96,7 @@ export const getAllWebsites = async (req: Request, res: Response) => {
             matchStage.category = category;
         }
 
-        // 2. Run Aggregation Pipeline
+        //Run Aggregation Pipeline
         const websites = await Website.aggregate([
             { $match: matchStage },
             {
@@ -117,7 +116,7 @@ export const getAllWebsites = async (req: Request, res: Response) => {
             { $limit: limit }
         ]);
 
-        // 3. Get Total Count (Separate query needed for pagination)
+        // Get Total Count 
         const totalDocs = await Website.countDocuments(matchStage);
 
         res.status(200).json({
@@ -133,7 +132,7 @@ export const getAllWebsites = async (req: Request, res: Response) => {
     }
 };
 
-// NEW: AI Search Endpoint
+// AI Search Endpoint
 export const searchAI = async (req: Request, res: Response) => {
     try {
         const { query } = req.body;
@@ -144,7 +143,6 @@ export const searchAI = async (req: Request, res: Response) => {
 
         if (suggestions.length === 0) {
             // If AI failed or returned nothing, send 200 with empty array
-            // This allows the frontend to just show DB results without error
             return res.status(200).json({ websites: [] });
         }
 
@@ -160,7 +158,7 @@ export const searchAI = async (req: Request, res: Response) => {
 export const likeWebsite = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
-        const userId = req.user.sub; // Get logged-in user ID
+        const userId = req.user.sub; 
 
         const website = await Website.findById(id);
         if (!website) return res.status(404).json({ message: "Website not found" });
@@ -192,7 +190,6 @@ export const viewWebsite = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        // Ensure we increment ONLY the views
         const website = await Website.findByIdAndUpdate(
             id,
             { $inc: { views: 1 } },

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-// 1. The TypeScript Interface 
+//TypeScript Interface 
 export interface IWebsite extends Document {
   title: string;
   url: string;
@@ -8,13 +8,13 @@ export interface IWebsite extends Document {
   description: string;
   category: string;
   tags: string[];
-  screenshotUrl?: string;   // Optional (?) because AI might not get it immediately
+  screenshotUrl?: string;   
   addedBy?: mongoose.Types.ObjectId; // Link to the User who added it
   approved: boolean;        // For Admin moderation
   upvotes: mongoose.Types.ObjectId[];
   views: number;
   
-  // The AI Fields (The "StackSift" Magic)
+  //AI Fields 
   aiSummary?: string;
   aiCategories?: string[];
   aiKeywords?: string[];
@@ -23,18 +23,18 @@ export interface IWebsite extends Document {
   updatedAt: Date;
 }
 
-// 2. The Mongoose Schema
+//Mongoose Schema
 const WebsiteSchema: Schema = new Schema({
   title: { type: String, required: true, trim: true },
   url: { type: String, required: true, unique: true },
-  domain: { type: String }, // We can extract this from URL automatically later
+  domain: { type: String }, 
   description: { type: String, required: true },
   category: { type: String, default: 'Uncategorized' },
   tags: { type: [String], default: [] },
   
   screenshotUrl: { type: String },
   
-  // Relationship to User (We will build the User model next!)
+  // Relationship to User 
   addedBy: { type: Schema.Types.ObjectId, ref: 'User' }, 
   
   // Status Fields
@@ -51,5 +51,5 @@ const WebsiteSchema: Schema = new Schema({
   // updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-// 3. Export
+// Export
 export default mongoose.model<IWebsite>('Website', WebsiteSchema);

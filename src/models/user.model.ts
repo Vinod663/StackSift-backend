@@ -11,7 +11,7 @@ export interface IUser extends Document {
   passwordHash?: string;
   googleId?: string;
   avatarUrl?: string;
-  role: Role[]; // Note: You named this "role" (singular)
+  role: Role[]; 
   bio?: string;
   coverGradient?: string;
   createdAt: Date;

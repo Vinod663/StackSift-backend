@@ -4,11 +4,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// 1. Setup Gemini
+//Setup Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-// 2. Define the expected output structure
+//Define the expected output structure
 interface AIResponse {
   summary: string;
   category: string;
@@ -17,7 +17,7 @@ interface AIResponse {
 
 export const generateWebsiteInfo = async (url: string): Promise<AIResponse | null> => {
   try {
-    // 3. The Prompt (The instructions we give to the AI)
+    //The Prompt (The instructions we give to the AI)
     const prompt = `
       I am building a developer tool directory. 
       Analyze this URL: ${url}
@@ -35,18 +35,18 @@ export const generateWebsiteInfo = async (url: string): Promise<AIResponse | nul
       }
     `;
 
-    // 4. Send to Gemini
+    //Send to Gemini
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    // 5. Clean and Parse JSON (AI sometimes adds backticks)
+    //Clean and Parse JSON (AI sometimes adds backticks)
     const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(jsonString);
 
   } catch (error) {
     console.error("AI Generation Failed:", error);
-    return null; // If AI fails, we just return null and use manual data
+    return null; // If AI fails,return null and use manual data
   }
 };
 
@@ -87,7 +87,7 @@ export const suggestToolsFromAI = async (query: string) => {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    // Aggressive cleanup: remove markdown, newlines, and code blocks
+    //remove markdown, newlines, and code blocks
     let text = response.text().replace(/```json|```/g, '').trim();
     
     // Find the start [ and end ] to ignore any extra text the AI might have added
@@ -106,7 +106,7 @@ export const suggestToolsFromAI = async (query: string) => {
         return []; // Return empty array instead of crashing
     }
 
-    // 3. SAVE TO CACHE (Using Upsert to fix Race Condition)
+    //SAVE TO CACHE (Using Upsert to fix Race Condition)
     if (Array.isArray(aiResults) && aiResults.length > 0) {
         await AiCache.findOneAndUpdate(
             { query: cleanQuery }, // Find by query
