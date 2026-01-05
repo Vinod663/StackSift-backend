@@ -10,7 +10,7 @@ import userRoutes from './routes/user.routes';
 
 dotenv.config();
 
-const SERVER_PORT = process.env.SERVER_PORT 
+const SERVER_PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI as string
 
 const app = express()
