@@ -10,10 +10,12 @@ export const sendContactEmail = async (req: Request, res: Response) => {
 
         //Configure the Transporter (Gmail Example)
         const transporter = nodemailer.createTransport({
-            service: 'gmail', 
+           host: 'smtp.gmail.com',  // Use explicit host
+           port: 465,               // Use Secure SSL Port
+           secure: true,            // This must be true for port 465
             auth: {
-                user: process.env.MAIL_USER, 
-                pass: process.env.MAIL_PASS  
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS
             }
         });
 
