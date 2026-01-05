@@ -20,9 +20,4 @@ router.post('/google', googleLogin);
 router.post('/verify-password', authenticate, verifyPassword);
 
 
-//Default Get of https://stacksift-api.onrender.com
-router.get('/', (req, res) => {
-    res.send('Welcome to StackSift API');
-});
-
 export default router;

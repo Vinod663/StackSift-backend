@@ -29,6 +29,15 @@ app.use(cors({
 
 
 // Routes
+// Root route for health check
+//http://localhost:4000/
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: "StackSift API is running successfully!",
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api/v1/post', postRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/collections', collectionRoutes);
