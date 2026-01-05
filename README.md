@@ -99,7 +99,7 @@ Before running the server, ensure you have the following installed:
 
 ## Deployment
 
-* **Backend URL:** [Insert Deployed Backend URL Here]
+* **Backend URL:** https://stacksift-api.onrender.com
 * **Database:** MongoDB Atlas
 
 ---
