@@ -23,7 +23,7 @@ export const generateWebsiteInfo = async (url: string): Promise<AIResponse | nul
       Analyze this URL: ${url}
       
       Tasks:
-      1. Write a short, punchy summary (max 2 sentences) for a developer audience.
+      1. Write a short, punchy summary (max 13 words 85 characters) for a developer audience.
       2. Choose ONE category from: [Development, Design, Productivity, AI, DevOps, Learning].(Do not use "Development" if "Design" or "AI" fits better).
       3. Generate 3-5 relevant, lowercase tags.
 
