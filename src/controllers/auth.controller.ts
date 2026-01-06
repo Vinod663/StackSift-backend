@@ -61,6 +61,7 @@ export const login = async (req: Request, res: Response) => {
         }
 
         const user = await User.findOne({ email });
+        
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
@@ -79,11 +80,25 @@ export const login = async (req: Request, res: Response) => {
         const accessToken = signAccessToken(user);
         const refreshToken = signRefreshToken(user);
 
+        res.cookie('jwt', refreshToken, {
+            httpOnly: true, 
+            secure: true,   
+            sameSite: 'none', 
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Days
+        });
+
         res.json({
             message: 'Login successful',
-            user: { id: user._id, name: user.name, role: user.role, email: user.email, avatarUrl: user.avatarUrl, bio: user.bio, coverGradient: user.coverGradient || 'default' },
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                role: user.role, 
+                email: user.email, 
+                avatarUrl: user.avatarUrl, 
+                bio: user.bio, 
+                coverGradient: user.coverGradient || 'default' 
+            },
             accessToken,
-            refreshToken
         });
     } catch (error: any) {
         res.status(500).json({ message: 'Error logging in', error: error?.message });
@@ -93,14 +108,16 @@ export const login = async (req: Request, res: Response) => {
 // --- REFRESH TOKEN ---
 export const refreshToken = async (req: Request, res: Response) => {
     try {
-        const { token } = req.body;
+        const cookies = req.cookies;
 
-        if (!token) {
-            return res.status(400).json({ message: "Refresh Token is required" });
+        if (!cookies?.jwt) {
+            return res.status(401).json({ message: "Unauthorized: No Refresh Token" });
         }
 
-        // Verify and Cast type for TS safety
-        const payload = jwt.verify(token, JWT_REFRESH_SECRET) as JwtPayload;
+        const refreshToken = cookies.jwt;
+
+        // Verify token
+        const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as JwtPayload;
 
         const user = await User.findById(payload.sub);
 
@@ -109,7 +126,7 @@ export const refreshToken = async (req: Request, res: Response) => {
         }
 
         const accessToken = signAccessToken(user);
-
+        
         res.status(200).json({
             message: 'New access token generated successfully',
             accessToken: accessToken
@@ -123,13 +140,13 @@ export const refreshToken = async (req: Request, res: Response) => {
 // --- GOOGLE SIGN-IN ---
 export const googleLogin = async (req: Request, res: Response) => {
     try {
-        const { token } = req.body; // Frontend sends the "idToken"
+        const { token } = req.body; 
 
         if (!token) {
             return res.status(400).json({ message: "Token is required" });
         }
 
-        //Verify the Token with Google
+        // Verify the Token with Google
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID, 
@@ -143,18 +160,16 @@ export const googleLogin = async (req: Request, res: Response) => {
 
         const { email, name, picture, sub: googleId } = payload;
 
-        // Check if user already exists in OUR database
         let user = await User.findOne({ email });
 
         if (user) {
-            // User exists!
-            // If they didn't have a googleId before (e.g., signed up with password), link it now.
+            // User exists! Link Google ID if missing.
             if (!user.googleId) {
                 user.googleId = googleId;
                 await user.save();
             }
         } else {
-            // User doesn't exist!
+            // User doesn't exist! Create new user.
             user = new User({
                 name: name,
                 email: email,
@@ -165,15 +180,30 @@ export const googleLogin = async (req: Request, res: Response) => {
             await user.save();
         }
 
-        //Generate Tokens (Same as normal login)
+        // Generate Tokens
         const accessToken = signAccessToken(user);
         const refreshToken = signRefreshToken(user);
 
+        res.cookie('jwt', refreshToken, {
+            httpOnly: true, 
+            secure: true,    
+            sameSite: 'none',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Days
+        });
+
+        // Send response 
         res.status(200).json({
             message: 'Google Login successful',
-            user: { id: user._id, name: user.name, role: user.role, email: user.email, avatarUrl: user.avatarUrl, bio: user.bio, coverGradient: user.coverGradient || 'default' },
-            accessToken,
-            refreshToken
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                role: user.role, 
+                email: user.email, 
+                avatarUrl: user.avatarUrl, 
+                bio: user.bio, 
+                coverGradient: user.coverGradient || 'default' 
+            },
+            accessToken, 
         });
 
     } catch (error: any) {

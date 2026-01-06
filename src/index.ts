@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes';
 import collectionRoutes from './routes/collection.routes';
 import contactRoutes from './routes/contact.routes';
 import userRoutes from './routes/user.routes';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const app = express()
 
 
 app.use(express.json())
-
+app.use(cookieParser())
 
 app.use(cors({
     origin: ['http://localhost:5173', 'http://localhost:5175', 'https://stacksift-frontend.vercel.app'],           
