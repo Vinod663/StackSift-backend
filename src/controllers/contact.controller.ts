@@ -8,9 +8,9 @@ export const sendContactEmail = async (req: Request, res: Response) => {
     const { name, email, subject, message } = req.body;
 
     const { data, error } = await resend.emails.send({
-      from: 'onboarding@resend.dev', 
+      from: 'StackSift Support <onboarding@resend.dev>', 
       to: 'vinodfernando048@gmail.com', 
-      replyTo: email, // <--- CHANGED THIS (was reply_to)
+      replyTo: email, 
       subject: `[StackSift Support] ${subject}`,
       html: `
         <h3>New Support Request</h3>
